@@ -8,7 +8,7 @@ import sys
 from universe.config.simulation_config import CONFIG
 
 
-def list_available_simulations(sim_dir: str = "examples") -> list[str]:
+def list_available_simulations(sim_dir: str = "universe/examples") -> list[str]:
     """
     Retorna una lista con los scripts disponibles en el directorio de simulaciones.
 
@@ -39,18 +39,16 @@ def run_simulation(name: str) -> None:
         Nombre del script sin extensión.
     """
     print(f"[CLI] Backend activo: {CONFIG.backend_name.upper()}")
-    module_path = f"examples.{name}"
+    module_path = f"universe.examples.{name}"
 
     try:
         sim_module = importlib.import_module(module_path)
-        module_attrs = dir(sim_module)
-
-        if "main" in module_attrs and callable(sim_module.main):
+        if hasattr(sim_module, "main") and callable(sim_module.main):
             print(f"[CLI] Ejecutando main() del módulo '{name}'...")
             sim_module.main()
         else:
             print(f"[CLI] El módulo '{name}' no tiene función main(). Ejecutando como script completo...")
-            with open(f"examples/{name}.py", "r", encoding="utf-8") as f:
+            with open(f"universe/examples/{name}.py", "r", encoding="utf-8") as f:
                 exec(f.read(), {"__name__": "__main__"})
 
     except ModuleNotFoundError:
@@ -76,16 +74,13 @@ def main() -> None:
 
     if args.command == "simulate":
         run_simulation(args.name)
-
     elif args.command == "list":
         print("[CLI] Simulaciones disponibles:")
         for sim in list_available_simulations():
             print(f"  - {sim}")
-
     elif args.command == "test":
         print("[CLI] Ejecutando suite de tests...")
         os.system("pytest --cov=universe tests/")
-
     else:
         parser.print_help()
 

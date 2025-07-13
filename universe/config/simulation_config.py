@@ -11,6 +11,18 @@ class SimulationConfig:
     max_iterations: int = 10_000
     default_backend: str = "cupy"
 
+    @property
+    def backend_name(self) -> str:
+        """
+        Nombre del backend activo.
+
+        Returns
+        -------
+        str
+            'cupy' si se usa GPU, 'numpy' en caso contrario.
+        """
+        return "cupy" if self.use_gpu else "numpy"
+
     def toggle_debug(self) -> None:
         """Activa o desactiva el modo debug."""
         self.debug_mode = not self.debug_mode

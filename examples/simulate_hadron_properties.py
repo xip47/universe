@@ -4,6 +4,9 @@ from universe.numerics.backend import xp
 
 
 def print_hadron_summary() -> None:
+    """
+    Imprime un resumen físico de los hadrones definidos.
+    """
     print(f"\n[Simulación] Backend numérico activo: {CONFIG.backend_name.upper()}")
     print("[Simulación] Listado de hadrones definidos:")
     print("-" * 70)
@@ -19,12 +22,15 @@ def print_hadron_summary() -> None:
 
 
 def main() -> None:
+    """
+    Punto de entrada principal para la simulación.
+    """
     print_hadron_summary()
 
 
-# ✅ Exponer main() explícitamente para importlib
+# ✅ Exposición explícita para el CLI (importlib)
 main = main
 
-# También ejecutable como script independiente
+# ✅ También ejecutable directamente
 if __name__ == "__main__":
     main()
