@@ -39,22 +39,17 @@ def run_simulation(name: str) -> None:
         Nombre del script sin extensión.
     """
     print(f"[CLI] Backend activo: {CONFIG.backend_name.upper()}")
-    module_path = f"universe.examples.{name}"
+    sim_path = os.path.join("examples", f"{name}.py")
 
-    try:
-        sim_module = importlib.import_module(module_path)
-        if hasattr(sim_module, "main") and callable(sim_module.main):
-            print(f"[CLI] Ejecutando main() del módulo '{name}'...")
-            sim_module.main()
-        else:
-            print(f"[CLI] El módulo '{name}' no tiene función main(). Ejecutando como script completo...")
-            with open(f"universe/examples/{name}.py", "r", encoding="utf-8") as f:
-                exec(f.read(), {"__name__": "__main__"})
-
-    except ModuleNotFoundError:
+    if not os.path.exists(sim_path):
         print(f"[ERROR] No se encontró el script '{name}' en examples/")
         sys.exit(1)
 
+    try:
+        print(f"[CLI] Ejecutando script: {sim_path}")
+        with open(sim_path, "r", encoding="utf-8") as f:
+            code = compile(f.read(), sim_path, "exec")
+            exec(code, {"__name__": "__main__"})
     except Exception as e:
         print(f"[ERROR] Falló la ejecución de '{name}': {e}")
         sys.exit(1)
