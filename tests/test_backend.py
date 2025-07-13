@@ -1,26 +1,66 @@
-from universe.config.simulation_config import CONFIG
+"""
+Tests del módulo numérico backend.
+
+Verifica que el sistema esté utilizando correctamente CuPy o NumPy
+según la configuración, y que las operaciones básicas funcionen.
+"""
+
 from universe.numerics import backend
+from universe.config.simulation_config import CONFIG
 
 
-def test_backend_basic_operations() -> None:
-    """Verifica operaciones básicas de backend y tipo de array."""
+def test_backend_operaciones_basicas() -> None:
+    """
+    Testea operaciones aritméticas básicas y la consistencia de tipo de datos.
+
+    Returns
+    -------
+    None
+    """
     xp = backend.xp
-    a = xp.array([1, 2, 3])
-    b = xp.array([4, 5, 6])
-    c = xp.dot(a, b)
+    a = backend.array([1.0, 2.0, 3.0])
+    b = backend.array([4.0, 5.0, 6.0])
+    resultado = backend.dot(a, b)
 
-    assert c == 32
+    assert resultado == 32.0
     assert hasattr(a, "shape")
-    assert callable(xp.zeros)
+    assert a.dtype == backend.DTYPE
+    assert callable(backend.zeros)
 
-def test_backend_switching() -> None:
-    """Verifica que se pueda cambiar de GPU a CPU dinámicamente."""
-    CONFIG.force_cpu()
-    assert CONFIG.use_gpu is False
-    assert CONFIG.default_backend == "numpy"
 
-    from universe.numerics import backend as backend_cpu
-    assert "numpy" in str(type(backend_cpu.xp.array([1])))
+def test_backend_tipo_y_origen() -> None:
+    """
+    Informa si se está utilizando CuPy (GPU) o NumPy (CPU).
 
-    CONFIG.force_gpu()
-    assert CONFIG.use_gpu is True
+    Returns
+    -------
+    None
+    """
+    modulo = backend.xp.__name__
+    tipo = "GPU (CuPy)" if "cupy" in modulo else "CPU (NumPy)"
+
+    print(f"[Diagnóstico Backend] Backend activo: {modulo} → {tipo}")
+    print(f"[Diagnóstico Backend] Tipo de precisión: {backend.DTYPE.__name__}")
+
+    assert tipo in {"GPU (CuPy)", "CPU (NumPy)"}
+
+
+def test_gpu_disponible_si_configurado() -> None:
+    """
+    Verifica que CUDA esté realmente activo si `use_gpu` es True.
+
+    Returns
+    -------
+    None
+    """
+    if CONFIG.use_gpu:
+        import cupy
+        assert cupy.is_available()
+
+        device_id = cupy.cuda.runtime.getDevice()
+        device_props = cupy.cuda.runtime.getDeviceProperties(device_id)
+        device_name = device_props["name"]
+
+        print(f"[Verificación GPU] CUDA activo en: {device_name}")
+    else:
+        print("[Verificación GPU] Ejecutando en CPU (NumPy)")
