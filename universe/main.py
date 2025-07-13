@@ -43,17 +43,22 @@ def run_simulation(name: str) -> None:
 
     try:
         sim_module = importlib.import_module(module_path)
+        module_attrs = dir(sim_module)
 
-        if hasattr(sim_module, "main") and callable(sim_module.main):
+        if "main" in module_attrs and callable(sim_module.main):
             print(f"[CLI] Ejecutando main() del módulo '{name}'...")
             sim_module.main()
         else:
             print(f"[CLI] El módulo '{name}' no tiene función main(). Ejecutando como script completo...")
-            with open(f"examples/{name}.py", "r") as f:
+            with open(f"examples/{name}.py", "r", encoding="utf-8") as f:
                 exec(f.read(), {"__name__": "__main__"})
 
     except ModuleNotFoundError:
         print(f"[ERROR] No se encontró el script '{name}' en examples/")
+        sys.exit(1)
+
+    except Exception as e:
+        print(f"[ERROR] Falló la ejecución de '{name}': {e}")
         sys.exit(1)
 
 
@@ -61,14 +66,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Simulador físico del universo")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # Subcomando: simulate
     simulate_parser = subparsers.add_parser("simulate", help="Ejecutar una simulación")
     simulate_parser.add_argument("--name", required=True, help="Nombre del script en 'examples/'")
 
-    # Subcomando: list
     subparsers.add_parser("list", help="Listar simulaciones disponibles")
-
-    # Subcomando: test
     subparsers.add_parser("test", help="Ejecutar todos los tests del proyecto")
 
     args = parser.parse_args()
