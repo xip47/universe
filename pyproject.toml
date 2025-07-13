@@ -1,6 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "universe"
 version = "0.1.0"
 description = "Simulación física escalable del universo desde partículas fundamentales hasta vida emergente."
 readme = "README.md"
 requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.2.0",
+    "cupy-cuda12x>=13.4.0",
+    "scipy>=1.13.0",
+    "matplotlib>=3.10",
+    "PyQt5>=5.15.0",
+    "black>=25.0",
+    "flake8>=7.0",
+    "mypy>=1.16.0",
+    "pytest>=8.0",
+    "pytest-cov>=6.0"
+]
+
+[project.scripts]
+universe = "universe.main:main"
+
+[tool.setuptools]
+include-package-data = true
