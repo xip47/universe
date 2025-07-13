@@ -17,6 +17,7 @@ EPSILON_0: Final[float] = 8.854_187_8128e-12  # Permitividad del vacío (F·m⁻
 M_ELECTRON: Final[float] = 9.109_383_7015e-31  # Masa del electrón (kg)
 M_PROTON: Final[float] = 1.672_621_923_69e-27  # Masa del protón (kg)
 M_NEUTRON: Final[float] = 1.674_927_498_04e-27  # Masa del neutrón (kg)
+BOHR_RADIUS: float = 5.29177210903e-11  # Radio de Bohr (m)
 
 # === Otras constantes === #
 
