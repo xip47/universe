@@ -1,0 +1,6 @@
+[project]
+name = "universe"
+version = "0.1.0"
+description = "Simulación física escalable del universo desde partículas fundamentales hasta vida emergente."
+readme = "README.md"
+requires-python = ">=3.12"

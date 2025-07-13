@@ -1,0 +1,40 @@
+# Núcleo Numérico y CUDA
+numpy==2.2.6
+cupy-cuda12x==13.4.1
+scipy>=1.13.0
+numba==0.61.2
+llvmlite==0.44.0
+
+# Visualización y GUI
+matplotlib==3.10.3
+PyQt5==5.15.11
+PyQt5-Qt5==5.15.17
+PyQt5_sip==12.17.0
+
+# Desarrollo y Estilo
+black==25.1.0
+flake8==7.3.0
+mypy==1.16.1
+mypy_extensions==1.1.0
+pytest==8.4.1
+pytest-cov==6.2.1
+coverage==7.9.1
+
+# Dependencias auxiliares
+cycler==0.12.1
+kiwisolver==1.4.8
+python-dateutil==2.9.0.post0
+pyparsing==3.2.3
+packaging==25.0
+pillow==11.2.1
+platformdirs==4.3.8
+click==8.2.1
+iniconfig==2.1.0
+fastrlock==0.8.3
+fonttools==4.58.4
+pathspec==0.12.1
+Pygments==2.19.2
+pycodestyle==2.14.0
+pyflakes==3.4.0
+six==1.17.0
+typing_extensions==4.14.0
