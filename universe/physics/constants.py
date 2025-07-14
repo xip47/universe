@@ -12,6 +12,13 @@ PLANCK: Final[float] = 6.626_070_15e-34  # Constante de Planck (J·s)
 E_CHARGE: Final[float] = 1.602_176_634e-19  # Carga elemental (C)
 EPSILON_0: Final[float] = 8.854_187_8128e-12  # Permitividad del vacío (F·m⁻¹)
 
+MU_0: Final[float] = 4e-7 * 3.141592653589793  # Permeabilidad del vacío (H·m⁻¹)
+"""
+MU_0 : float
+    Permeabilidad magnética del vacío (H·m⁻¹).
+    Valor CODATA 2019: 4π × 10⁻⁷ H/m.
+"""
+
 # === Masas fundamentales === #
 
 M_ELECTRON: Final[float] = 9.109_383_7015e-31  # Masa del electrón (kg)

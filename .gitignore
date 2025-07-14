@@ -44,7 +44,49 @@ cupy_module_cache/
 *.sublime-project
 *.sublime-workspace
 
+# Cursor IDE
+.cursor/
+
 # Archivos ZIP o paquetes exportados
 *.zip
 *.tar.gz
 *.whl
+
+# Archivos temporales del sistema
+*.tmp
+*.temp
+*~
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos de configuración local
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Archivos de datos temporales
+*.dat
+*.csv.tmp
+*.json.tmp
+
+# Archivos de profiling y debugging
+*.prof
+*.pstats
+debug.log
+
+# Archivos de configuración de mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Archivos de configuración de black
+.black_cache/
+
+# Archivos de configuración de flake8
+.flake8_cache/
+
+# Archivos de configuración de coverage
+.coverage.*

@@ -3,6 +3,9 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Literal
+from typing import Sequence
+from typing import Optional
+import numpy as np
 
 
 class BaseParticle(ABC):
@@ -155,3 +158,74 @@ class Boson(BaseParticle):
 
     def is_boson(self) -> bool:
         return True
+
+
+@dataclass
+class DynamicParticle:
+    """
+    Representa una partícula fundamental con estado dinámico para simulaciones.
+
+    Hereda propiedades físicas de una instancia de BaseParticle (o sus hijas) y añade atributos dinámicos
+    como posición, velocidad y aceleración en el espacio.
+
+    Parameters
+    ----------
+    static : BaseParticle
+        Instancia de la partícula fundamental (Quark, Lepton, Boson).
+    position : np.ndarray
+        Vector de posición (m) en el espacio (dimensión arbitraria, típicamente 3).
+    velocity : np.ndarray
+        Vector de velocidad (m/s).
+    acceleration : Optional[np.ndarray]
+        Vector de aceleración (m/s²), opcional.
+    """
+    static: BaseParticle
+    position: np.ndarray
+    velocity: np.ndarray
+    acceleration: Optional[np.ndarray] = None
+
+    def __post_init__(self):
+        if self.position.shape != self.velocity.shape:
+            raise ValueError("La posición y la velocidad deben tener la misma dimensión.")
+        if self.acceleration is not None and self.acceleration.shape != self.position.shape:
+            raise ValueError("La aceleración debe tener la misma dimensión que la posición.")
+
+class ParticleSystem:
+    """
+    Sistema de partículas fundamentales con dinámica clásica.
+
+    Permite simular la evolución temporal de un conjunto de partículas bajo fuerzas externas e internas.
+
+    Parameters
+    ----------
+    particles : Sequence[DynamicParticle]
+        Lista de partículas dinámicas.
+    """
+    def __init__(self, particles: Sequence[DynamicParticle]):
+        self.particles = list(particles)
+        self.dim = self.particles[0].position.shape[0] if self.particles else 0
+
+    def get_positions(self) -> np.ndarray:
+        """Devuelve un array de posiciones de todas las partículas."""
+        return np.stack([p.position for p in self.particles])
+
+    def get_velocities(self) -> np.ndarray:
+        """Devuelve un array de velocidades de todas las partículas."""
+        return np.stack([p.velocity for p in self.particles])
+
+    def step(self, dt: float, force_fn) -> None:
+        """
+        Avanza el sistema una vez usando integración de Euler.
+
+        Parameters
+        ----------
+        dt : float
+            Paso temporal (s).
+        force_fn : Callable[[ParticleSystem], np.ndarray]
+            Función que calcula la fuerza sobre cada partícula (N).
+        """
+        forces = force_fn(self)
+        for i, p in enumerate(self.particles):
+            a = forces[i] / (p.static.mass_mev * 1.78266192e-30)  # Conversión MeV/c² a kg
+            p.velocity += a * dt
+            p.position += p.velocity * dt
