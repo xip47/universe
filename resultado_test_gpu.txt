@@ -1,0 +1,67 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.11, pytest-8.4.1, pluggy-1.6.0
+rootdir: /home/einstenium/framework/universe
+configfile: pytest.ini
+plugins: cov-6.2.1
+collected 10 items
+
+tests/physics/test_nuclear.py .......FF.                                 [100%]
+
+=================================== FAILURES ===================================
+_________________________ test_energy_conservation_2d __________________________
+tests/physics/test_nuclear.py:180: in test_energy_conservation_2d
+    delta_E = xp.abs(E_hist - E_hist[0])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+cupy/_core/_kernel.pyx:1285: in cupy._core._kernel.ufunc.__call__
+    ???
+cupy/_core/_kernel.pyx:159: in cupy._core._kernel._preprocess_args
+    ???
+cupy/_core/_kernel.pyx:145: in cupy._core._kernel._preprocess_arg
+    ???
+E   TypeError: Unsupported type <class 'numpy.ndarray'>
+_______________________ test_multi_particle_interaction ________________________
+tests/physics/test_nuclear.py:222: in test_multi_particle_interaction
+    delta_E = xp.abs(E_hist - E_hist[0])
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+cupy/_core/_kernel.pyx:1285: in cupy._core._kernel.ufunc.__call__
+    ???
+cupy/_core/_kernel.pyx:159: in cupy._core._kernel._preprocess_args
+    ???
+cupy/_core/_kernel.pyx:145: in cupy._core._kernel._preprocess_arg
+    ???
+E   TypeError: Unsupported type <class 'numpy.ndarray'>
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.11-final-0 _______________
+
+Name                                         Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------------
+universe/__init__.py                             0      0   100%
+universe/config/simulation_config.py            20      6    70%   24, 28, 32-33, 37-38
+universe/hadrons/__init__.py                     0      0   100%
+universe/hadrons/composite.py                   19     19     0%   1-47
+universe/hadrons/instances.py                   10     10     0%   1-40
+universe/main.py                                79     79     0%   3-158
+universe/numerics/__init__.py                    0      0   100%
+universe/numerics/backend.py                    32      6    81%   36-42
+universe/numerics/vector_ops.py                 46     46     0%   6-97
+universe/particles/__init__.py                   0      0   100%
+universe/particles/constants.py                  5      5     0%   1-123
+universe/particles/definitions.py              103     18    83%   42, 47, 52, 82, 85, 88, 118, 121, 124, 154, 157, 160, 189, 191, 210, 214, 242, 261
+universe/particles/mass_model.py                27     27     0%   3-115
+universe/particles/standard_model.py            12     12     0%   1-63
+universe/physics/__init__.py                     0      0   100%
+universe/physics/constants.py                   23     23     0%   3-53
+universe/physics/nuclear/decays.py              10      2    80%   24, 26
+universe/physics/nuclear/potentials.py          57      5    91%   24, 26, 135, 190, 223
+universe/physics/nuclear/utils.py                8      0   100%
+universe/quantum_states/__init__.py              0      0   100%
+universe/quantum_states/energy_levels.py        10     10     0%   1-59
+universe/quantum_states/observables.py          30     30     0%   1-58
+universe/quantum_states/quantum_numbers.py      31     31     0%   3-69
+universe/quantum_states/wavefunctions.py        43     43     0%   3-107
+--------------------------------------------------------------------------
+TOTAL                                          565    372    34%
+=========================== short test summary info ============================
+FAILED tests/physics/test_nuclear.py::test_energy_conservation_2d - TypeError...
+FAILED tests/physics/test_nuclear.py::test_multi_particle_interaction - TypeE...
+========================= 2 failed, 8 passed in 6.10s ==========================

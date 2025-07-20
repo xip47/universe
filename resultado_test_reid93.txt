@@ -1,0 +1,41 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.11, pytest-8.4.1, pluggy-1.6.0
+rootdir: /home/einstenium/framework/universe
+configfile: pytest.ini
+plugins: cov-6.2.1
+collected 3 items
+
+tests/physics/test_nuclear.py ...                                        [100%]
+
+================================ tests coverage ================================
+_______________ coverage: platform linux, python 3.12.11-final-0 _______________
+
+Name                                         Stmts   Miss  Cover   Missing
+--------------------------------------------------------------------------
+universe/__init__.py                             0      0   100%
+universe/config/simulation_config.py            20      6    70%   24, 28, 32-33, 37-38
+universe/hadrons/__init__.py                     0      0   100%
+universe/hadrons/composite.py                   19     19     0%   1-47
+universe/hadrons/instances.py                   10     10     0%   1-40
+universe/main.py                                79     79     0%   3-158
+universe/numerics/__init__.py                    0      0   100%
+universe/numerics/backend.py                    32      6    81%   36-42
+universe/numerics/vector_ops.py                 46     46     0%   6-97
+universe/particles/__init__.py                   0      0   100%
+universe/particles/constants.py                  5      5     0%   1-123
+universe/particles/definitions.py              103    103     0%   1-261
+universe/particles/mass_model.py                27     27     0%   3-115
+universe/particles/standard_model.py            12     12     0%   1-63
+universe/physics/__init__.py                     0      0   100%
+universe/physics/constants.py                   23     23     0%   3-53
+universe/physics/nuclear/decays.py              10      2    80%   24, 26
+universe/physics/nuclear/potentials.py          57      7    88%   24, 26, 135, 187, 190, 221, 223
+universe/physics/nuclear/utils.py                8      0   100%
+universe/quantum_states/__init__.py              0      0   100%
+universe/quantum_states/energy_levels.py        10     10     0%   1-59
+universe/quantum_states/observables.py          30     30     0%   1-58
+universe/quantum_states/quantum_numbers.py      31     31     0%   3-69
+universe/quantum_states/wavefunctions.py        43     43     0%   3-107
+--------------------------------------------------------------------------
+TOTAL                                          565    459    19%
+============================== 3 passed in 2.09s ===============================
