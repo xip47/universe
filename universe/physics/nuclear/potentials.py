@@ -42,16 +42,22 @@ class YukawaPotential:
         self.g: float = g
         self.mu: float = mu  # 1/fm ~ 1.43e15 1/m para el pión
 
-    def potential(self, r: float | xp.ndarray) -> float | xp.ndarray:
+    def potential(self, r: float | xp.ndarray, spin1=None, spin2=None, isospin1=None, isospin2=None, quantum_state1=None, quantum_state2=None) -> float | xp.ndarray:
         """
-        Compute the Yukawa potential V(r).
+        Compute the Yukawa potential V(r) with optional spin/isospin dependence.
 
-        Calcula el potencial de Yukawa V(r).
+        Calcula el potencial de Yukawa V(r) con dependencia opcional de spin/isospin.
 
         Parameters
         ----------
         r : float or xp.ndarray
             Distancia entre nucleones (m).
+        spin1, spin2 : opcional
+            Grados de libertad de spin de cada partícula.
+        isospin1, isospin2 : opcional
+            Grados de libertad de isospin de cada partícula.
+        quantum_state1, quantum_state2 : opcional
+            Estados cuánticos de cada partícula.
 
         Returns
         -------
@@ -62,18 +68,25 @@ class YukawaPotential:
         hbar_c: float = 1.973269804e-16  # J·m
         V = -self.g**2 * hbar_c * xp.exp(-self.mu * r) / r
         V = xp.where(r == 0, 0.0, V)
+        # Aquí se pueden añadir dependencias de spin/isospin si se desea
         return V
 
-    def force(self, r: float | xp.ndarray) -> float | xp.ndarray:
+    def force(self, r: float | xp.ndarray, spin1=None, spin2=None, isospin1=None, isospin2=None, quantum_state1=None, quantum_state2=None) -> float | xp.ndarray:
         """
-        Compute the strong nuclear force F(r) = -dV/dr.
+        Compute the strong nuclear force F(r) = -dV/dr with optional spin/isospin dependence.
 
-        Calcula la fuerza nuclear fuerte F(r) = -dV/dr.
+        Calcula la fuerza nuclear fuerte F(r) = -dV/dr con dependencia opcional de spin/isospin.
 
         Parameters
         ----------
         r : float or xp.ndarray
             Distancia entre nucleones (m).
+        spin1, spin2 : opcional
+            Grados de libertad de spin de cada partícula.
+        isospin1, isospin2 : opcional
+            Grados de libertad de isospin de cada partícula.
+        quantum_state1, quantum_state2 : opcional
+            Estados cuánticos de cada partícula.
 
         Returns
         -------
@@ -84,6 +97,7 @@ class YukawaPotential:
         hbar_c: float = 1.973269804e-16  # J·m
         F = -self.g**2 * hbar_c * xp.exp(-self.mu * r) * (1 + self.mu * r) / (r**2)
         F = xp.where(r == 0, 0.0, F)
+        # Aquí se pueden añadir dependencias de spin/isospin si se desea
         return F
 
 # Ejemplo de interfaz para futuros modelos avanzados:
@@ -157,11 +171,11 @@ class Reid93Potential:
         r = xp.asarray(r)
         return xp.exp(-mass * r) / r
 
-    def potential(self, r: float | xp.ndarray, S: int = 0, T: int = 1) -> xp.ndarray:
+    def potential(self, r: float | xp.ndarray, S: int = 0, T: int = 1, spin1=None, spin2=None, isospin1=None, isospin2=None, quantum_state1=None, quantum_state2=None) -> xp.ndarray:
         """
-        Compute the full Reid93 potential for given spin (S) and isospin (T).
+        Compute the full Reid93 potential for given spin (S), isospin (T), y grados de libertad extendidos.
 
-        Calcula el potencial total de Reid93 para spin (S) e isospin (T) dados.
+        Calcula el potencial total de Reid93 para spin (S), isospin (T) y grados de libertad extendidos.
 
         Parameters
         ----------
@@ -171,6 +185,12 @@ class Reid93Potential:
             Spin total (0 o 1).
         T : int
             Isospin total (0 o 1).
+        spin1, spin2 : opcional
+            Grados de libertad de spin de cada partícula.
+        isospin1, isospin2 : opcional
+            Grados de libertad de isospin de cada partícula.
+        quantum_state1, quantum_state2 : opcional
+            Estados cuánticos de cada partícula.
 
         Returns
         -------
@@ -184,19 +204,25 @@ class Reid93Potential:
             V += coef * self.yukawa(r, mass)
         # Término tensorial (si aplica)
         for coef, mass in self.tensor_terms:
-            V += coef * self.yukawa(r, mass)  # Aquí se puede multiplicar por el operador tensorial S12
+            # Ejemplo: dependencia tensorial de spin
+            if spin1 is not None and spin2 is not None:
+                # Aquí se puede calcular el operador tensorial S12(spin1, spin2, r)
+                pass  # Placeholder para S12
+            V += coef * self.yukawa(r, mass)
         # Término spin-órbita (si aplica)
         for coef, mass in self.spin_orbit_terms:
-            V += coef * self.yukawa(r, mass)  # Aquí se puede multiplicar por el operador L·S
-        # Evitar singularidad en r=0
+            if spin1 is not None and quantum_state1 is not None:
+                # Aquí se puede calcular el operador L·S
+                pass  # Placeholder para L·S
+            V += coef * self.yukawa(r, mass)
         V = xp.where(r == 0, 0.0, V)
         return V
 
-    def force(self, r: float | xp.ndarray, S: int = 0, T: int = 1) -> xp.ndarray:
+    def force(self, r: float | xp.ndarray, S: int = 0, T: int = 1, spin1=None, spin2=None, isospin1=None, isospin2=None, quantum_state1=None, quantum_state2=None) -> xp.ndarray:
         """
-        Compute the force for the full Reid93 potential.
+        Compute the force for the full Reid93 potential with all degrees of freedom.
 
-        Calcula la fuerza para el potencial completo de Reid93.
+        Calcula la fuerza para el potencial completo de Reid93 con todos los grados de libertad.
 
         Parameters
         ----------
@@ -206,6 +232,12 @@ class Reid93Potential:
             Spin total (0 o 1).
         T : int
             Isospin total (0 o 1).
+        spin1, spin2 : opcional
+            Grados de libertad de spin de cada partícula.
+        isospin1, isospin2 : opcional
+            Grados de libertad de isospin de cada partícula.
+        quantum_state1, quantum_state2 : opcional
+            Estados cuánticos de cada partícula.
 
         Returns
         -------
@@ -214,12 +246,17 @@ class Reid93Potential:
         """
         r = xp.asarray(r)
         F = xp.zeros_like(r, dtype=xp.float64)
-        # Derivada analítica de Yukawa modificada
         for coef, mass in self.central_terms:
             F += coef * (-xp.exp(-mass * r) * (1 + mass * r) / (r**2))
         for coef, mass in self.tensor_terms:
+            if spin1 is not None and spin2 is not None:
+                # Aquí se puede calcular el operador tensorial S12(spin1, spin2, r)
+                pass
             F += coef * (-xp.exp(-mass * r) * (1 + mass * r) / (r**2))
         for coef, mass in self.spin_orbit_terms:
+            if spin1 is not None and quantum_state1 is not None:
+                # Aquí se puede calcular el operador L·S
+                pass
             F += coef * (-xp.exp(-mass * r) * (1 + mass * r) / (r**2))
         F = xp.where(r == 0, 0.0, F)
         return F

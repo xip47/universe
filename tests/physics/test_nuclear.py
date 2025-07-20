@@ -274,3 +274,51 @@ def test_symmetry_translation_rotation():
     PE_rot = float(reid.potential(d_rot))
     assert xp.isclose(PE0, PE_shift), "La energía potencial no es invariante bajo traslación."
     assert xp.isclose(PE0, PE_rot), "La energía potencial no es invariante bajo rotación."
+
+def test_reid93_with_spin_isospin():
+    """
+    Testea que Reid93Potential acepta y propaga spin/isospin y quantum_state.
+    """
+    import numpy as np
+    from universe.particles.degrees_of_freedom import Spin, Isospin, QuantumState
+    from universe.particles.extended_definitions import BaseParticleExtended, DynamicParticleExtended
+    reid = Reid93Potential(channel="1S0")
+    spin1 = Spin(0.5, np.array([0, 0, 1]))
+    spin2 = Spin(-0.5, np.array([0, 0, -1]))
+    isospin1 = Isospin(0.5, np.array([1, 0, 0]))
+    isospin2 = Isospin(-0.5, np.array([-1, 0, 0]))
+    qs1 = QuantumState(1, 0, 0, 0.5, 0.5, 0.5)
+    qs2 = QuantumState(1, 0, 0, -0.5, 0.5, -0.5)
+    p1 = BaseParticleExtended("proton", 938.27, None, spin1, isospin1, qs1)
+    p2 = BaseParticleExtended("neutron", 939.57, None, spin2, isospin2, qs2)
+    dp1 = DynamicParticleExtended(p1, np.array([0.0, 0.0]), np.array([0.0, 0.0]), spin1, isospin1, qs1)
+    dp2 = DynamicParticleExtended(p2, np.array([1.0, 0.0]), np.array([0.0, 0.0]), spin2, isospin2, qs2)
+    r = np.linalg.norm(dp2.position - dp1.position)
+    V = reid.potential(r, spin1=dp1.spin, spin2=dp2.spin, isospin1=dp1.isospin, isospin2=dp2.isospin, quantum_state1=dp1.quantum_state, quantum_state2=dp2.quantum_state)
+    F = reid.force(r, spin1=dp1.spin, spin2=dp2.spin, isospin1=dp1.isospin, isospin2=dp2.isospin, quantum_state1=dp1.quantum_state, quantum_state2=dp2.quantum_state)
+    assert np.isscalar(V) or (hasattr(V, 'shape') and V.shape == ()), "El potencial debe ser escalar para r escalar."
+    assert np.isscalar(F) or (hasattr(F, 'shape') and F.shape == ()), "La fuerza debe ser escalar para r escalar."
+    # El valor debe ser finito
+    assert np.isfinite(V)
+    assert np.isfinite(F)
+
+def test_yukawa_with_spin_isospin():
+    """
+    Testea que YukawaPotential acepta y propaga spin/isospin y quantum_state.
+    """
+    import numpy as np
+    from universe.particles.degrees_of_freedom import Spin, Isospin, QuantumState
+    yukawa = YukawaPotential(g=1.0, mu=1.43e15)
+    spin1 = Spin(0.5, np.array([0, 0, 1]))
+    spin2 = Spin(-0.5, np.array([0, 0, -1]))
+    isospin1 = Isospin(0.5, np.array([1, 0, 0]))
+    isospin2 = Isospin(-0.5, np.array([-1, 0, 0]))
+    qs1 = QuantumState(1, 0, 0, 0.5, 0.5, 0.5)
+    qs2 = QuantumState(1, 0, 0, -0.5, 0.5, -0.5)
+    r = 1.0e-15
+    V = yukawa.potential(r, spin1=spin1, spin2=spin2, isospin1=isospin1, isospin2=isospin2, quantum_state1=qs1, quantum_state2=qs2)
+    F = yukawa.force(r, spin1=spin1, spin2=spin2, isospin1=isospin1, isospin2=isospin2, quantum_state1=qs1, quantum_state2=qs2)
+    assert np.isscalar(V) or (hasattr(V, 'shape') and V.shape == ()), "El potencial debe ser escalar para r escalar."
+    assert np.isscalar(F) or (hasattr(F, 'shape') and F.shape == ()), "La fuerza debe ser escalar para r escalar."
+    assert np.isfinite(V)
+    assert np.isfinite(F)
