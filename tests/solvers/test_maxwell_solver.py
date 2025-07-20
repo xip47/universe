@@ -78,3 +78,49 @@ def test_maxwell_energy_conservation():
     energy1 = float(xp.sum(0.5 * EPSILON_0 * solver.Ez**2 + 0.5 * MU_0 * (solver.Hx**2 + solver.Hy**2)) * dx**2)
     # La energía debe conservarse dentro de un 1%
     assert abs(energy1 - energy0) / energy0 < 0.01
+
+def test_pml_absorption():
+    """
+    Test PML absorption: a wave pulse debe ser absorbido en los bordes sin reflexiones significativas.
+
+    Valida que la energía electromagnética disminuye drásticamente cuando el pulso alcanza la región PML,
+    demostrando la efectividad de la absorción y la ausencia de reflexiones artificiales.
+    Además, registra la energía en cada paso para analizar la disipación.
+    """
+    shape = (100, 100)
+    dx = 1e-3
+    from universe.physics.constants import EPSILON_0, MU_0
+    def courant_dt(dx):
+        c = 1.0 / np.sqrt(EPSILON_0 * MU_0)
+        return dx / (c * np.sqrt(2)) * 0.99
+    dt = courant_dt(dx)
+    pml_thickness = 20
+    solver = MaxwellSolver(
+        shape, dx, dt,
+        pml_thickness=pml_thickness,
+        pml_sigma_max=50.0,
+        use_pml=True
+    )
+    # Pulso gaussiano en el centro, más pequeño
+    y, x = xp.meshgrid(xp.arange(shape[0]), xp.arange(shape[1]), indexing='ij')
+    y0, x0 = shape[0] // 2, shape[1] // 2
+    sigma = 3.0
+    solver.Ez = 0.01 * xp.exp(-((x - x0) ** 2 + (y - y0) ** 2) / (2 * sigma ** 2))
+    solver.Hx = xp.zeros(shape)
+    solver.Hy = xp.zeros(shape)
+    # Energía física inicial
+    energy0 = float(xp.sum(0.5 * EPSILON_0 * solver.Ez**2 + 0.5 * MU_0 * (solver.Hx**2 + solver.Hy**2)) * dx**2)
+    energies = [energy0]
+    steps = 400  # Más pasos para observar disipación
+    for _ in range(steps):
+        solver.step()
+        energy = float(xp.sum(0.5 * EPSILON_0 * solver.Ez**2 + 0.5 * MU_0 * (solver.Hx**2 + solver.Hy**2)) * dx**2)
+        energies.append(energy)
+    # Guardar evolución para diagnóstico
+    np.save('pml_energies.npy', np.array(energies))
+    # Analizar disipación: la energía debe disminuir progresivamente
+    diffs = np.diff(energies)
+    decreasing = np.sum(diffs < 0) / len(diffs)
+    assert decreasing > 0.9, f"La energía no decrece en la mayoría de los pasos: {decreasing*100:.1f}%"
+    # Al final, la energía debe ser < 1% de la inicial
+    assert energies[-1] < 0.01 * energy0, f"La energía final no se disipó lo suficiente: {energies[-1]} vs {energy0}"

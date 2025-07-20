@@ -8,28 +8,16 @@ from universe.numerics.backend import xp
 
 def radial_expectation_value(qn: QuantumNumbers, power: int = 1, Z: int = 1) -> float:
     """
-    Calcula el valor esperado <r^power> para una función de onda hidrogenoide.
-
-    Parameters
-    ----------
-    qn : QuantumNumbers
-        Números cuánticos del estado.
-    power : int
-        Potencia del radio (1 para <r>, 2 para <r^2>, etc).
-    Z : int
-        Carga nuclear efectiva (Z=1 para hidrógeno).
-
-    Returns
-    -------
-    float
-        Valor esperado de r^power en [m^power].
+    Calcula el valor esperado <r^power> para el estado hidrogenoide dado, con normalización física.
     """
-    r = xp.linspace(1e-12, 2e-9, 10_000)  # Dominio radial en metros
-    psi = full_wavefunction(qn, r, Z)
-    prob_density = xp.abs(psi)**2 * r**2
-    norm = xp.trapz(prob_density, r)
-    expected = xp.trapz(prob_density * r**power, r)
-    return float(expected / norm)
+    r = xp.linspace(1e-12, 2e-9, 10000)
+    psi = full_wavefunction(qn, Z)
+    psi_r = psi(r, 0.0, 0.0)
+    prob_density = xp.abs(psi_r) ** 2
+    dr = r[1] - r[0]
+    norm = float(xp.sum(prob_density * r ** 2) * dr)
+    expected = float(xp.sum(prob_density * r ** power * r ** 2) * dr)
+    return expected / norm
 
 
 def angular_momentum_squared(qn: QuantumNumbers) -> float:
@@ -53,25 +41,18 @@ def angular_momentum_squared(qn: QuantumNumbers) -> float:
 
 def probability_in_region(qn: QuantumNumbers, r_min: float, r_max: float, Z: int = 1) -> float:
     """
-    Calcula la probabilidad de encontrar al electrón entre r_min y r_max.
-
-    Parameters
-    ----------
-    qn : QuantumNumbers
-        Números cuánticos del estado.
-    r_min : float
-        Radio mínimo de la región [m].
-    r_max : float
-        Radio máximo de la región [m].
-    Z : int
-        Carga nuclear efectiva.
-
-    Returns
-    -------
-    float
-        Probabilidad (valor entre 0 y 1).
+    Calcula la probabilidad de encontrar el electrón entre r_min y r_max, con normalización física.
     """
-    r = xp.linspace(r_min, r_max, 10_000)
-    psi = full_wavefunction(qn, r, Z)
-    prob_density = xp.abs(psi)**2 * r**2
-    return float(xp.trapz(prob_density, r)) / float(xp.trapz(xp.abs(full_wavefunction(qn, xp.linspace(1e-12, 2e-9, 10_000), Z))**2 * xp.linspace(1e-12, 2e-9, 10_000)**2, xp.linspace(1e-12, 2e-9, 10_000)))
+    r = xp.linspace(r_min, r_max, 1000)
+    psi = full_wavefunction(qn, Z)
+    psi_r = psi(r, 0.0, 0.0)
+    prob_density = xp.abs(psi_r) ** 2
+    dr = r[1] - r[0]
+    # Normalizar usando la integral total en [1e-12, 2e-9]
+    r_full = xp.linspace(1e-12, 2e-9, 10000)
+    psi_full = psi(r_full, 0.0, 0.0)
+    prob_full = xp.abs(psi_full) ** 2
+    dr_full = r_full[1] - r_full[0]
+    norm = float(xp.sum(prob_full * r_full ** 2) * dr_full)
+    prob = float(xp.sum(prob_density * r ** 2) * dr)
+    return prob / norm

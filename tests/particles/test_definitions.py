@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from universe.particles.definitions import Quark, Lepton, Boson, DynamicParticle, ParticleSystem
-from universe.physics.electromagnetism import coulomb_forces_on_particles
+from universe.physics.electromagnetism.coulomb import coulomb_forces_on_particles
 from universe.physics.constants import E_CHARGE
 
 class DummyQuark(Quark):

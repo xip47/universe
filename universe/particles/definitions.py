@@ -229,3 +229,41 @@ class ParticleSystem:
             a = forces[i] / (p.static.mass_mev * 1.78266192e-30)  # Conversión MeV/c² a kg
             p.velocity += a * dt
             p.position += p.velocity * dt
+
+class Electron(Lepton):
+    """
+    Electron (e-): leptón fundamental de carga -1 y masa 0.511 MeV/c².
+
+    Parameters
+    ----------
+    Ninguno (valores físicos estándar).
+    """
+    def __init__(self) -> None:
+        super().__init__(
+            name="electron",
+            symbol="e-",
+            mass_mev=0.510998950,
+            charge=-1.0,
+            spin=0.5,
+            generation=1,
+            lepton_number=1
+        )
+
+class Proton(Quark):
+    """
+    Proton (p+): hadrón compuesto estable, tratado aquí como quark efectivo de carga +1 y masa 938.27 MeV/c².
+
+    Parameters
+    ----------
+    Ninguno (valores físicos estándar).
+    """
+    def __init__(self) -> None:
+        super().__init__(
+            name="proton",
+            symbol="p+",
+            mass_mev=938.27208816,
+            charge=+1.0,
+            spin=0.5,
+            generation=1,
+            color_charge=False
+        )
