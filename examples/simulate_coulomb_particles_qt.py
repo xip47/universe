@@ -5,7 +5,7 @@ from universe.particles.definitions import Quark
 from universe.particles.definitions import Lepton
 from universe.particles.definitions import DynamicParticle
 from universe.particles.definitions import ParticleSystem
-from universe.physics.electromagnetism import coulomb_forces_on_particles
+from universe.physics.electromagnetism.coulomb import coulomb_forces_on_particles
 from universe.physics.constants import E_CHARGE
 
 try:

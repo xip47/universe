@@ -69,3 +69,35 @@ def coulomb_vector_potential(*args, **kwargs):
     Placeholder para el potencial vectorial de Coulomb (no relevante para cargas estáticas).
     """
     raise NotImplementedError("El potencial vectorial de Coulomb solo es relevante para cargas en movimiento (corrientes).")
+
+
+def coulomb_forces_on_particles(system):
+    """
+    Calcula la fuerza de Coulomb sobre cada partícula de un sistema.
+
+    Parameters
+    ----------
+    system : ParticleSystem
+        Sistema de partículas (debe tener atributos 'particles', cada uno con 'static.charge' y 'position').
+
+    Returns
+    -------
+    list of xp.ndarray
+        Lista de fuerzas (N) sobre cada partícula.
+    """
+    n = len(system.particles)
+    forces = [xp.zeros_like(system.particles[0].position) for _ in range(n)]
+    for i, pi in enumerate(system.particles):
+        for j, pj in enumerate(system.particles):
+            if i == j:
+                continue
+            q1 = pi.static.charge * E_CHARGE
+            q2 = pj.static.charge * E_CHARGE
+            r1 = pi.position
+            r2 = pj.position
+            try:
+                f = coulomb_force(q1, q2, r1, r2)
+                forces[i] += f
+            except ValueError:
+                pass  # Ignora singularidades (misma posición)
+    return forces
