@@ -250,3 +250,101 @@ def test_cic_charge_conservation_high_velocity():
     assert np.isclose(total_grid_charge, total_particle_charge * E_CHARGE, atol=1e-12)
     # La corriente debe ser finita y no NaN
     assert np.all(np.isfinite(system.current_grid))
+
+
+def test_step_multiple_particles_updates():
+    """
+    Verifica que el método step actualiza la posición y velocidad de múltiples partículas de forma coherente.
+    Se inicializa un pulso gaussiano en Ez para que haya interacción física real.
+    Se dan varios pasos para asegurar que la dinámica se manifieste.
+    Las partículas se colocan fuera del centro para evitar simetría y asegurar fuerza neta.
+    Se usa mayor amplitud de campo y menor masa para robustez física.
+    """
+    shape = (32, 32)
+    dx = 1.0
+    dt = courant_dt(dx)
+    particles = [
+        create_centered_particle(1.0, 0.1, shape, v=0.1),
+        create_centered_particle(-1.0, 0.1, shape, v=-0.1)
+    ]
+    # Desplazar partículas fuera del centro para que sientan gradiente de campo
+    particles[0].position = xp.array([10.0, 10.0], dtype=xp.float64)
+    particles[1].position = xp.array([20.0, 20.0], dtype=xp.float64)
+    system = MaxwellParticleSystem(particles, shape, dx, dt)
+    # Inicializar campo Ez con un pulso gaussiano en el centro (amplitud 5.0)
+    y, x = xp.meshgrid(xp.arange(shape[0]), xp.arange(shape[1]), indexing='ij')
+    y0, x0 = shape[0] // 2, shape[1] // 2
+    sigma = 3.0
+    system.solver.Ez = 5.0 * xp.exp(-((x - x0) ** 2 + (y - y0) ** 2) / (2 * sigma ** 2))
+    pos0 = [p.position.copy() for p in particles]
+    vel0 = [p.velocity.copy() for p in particles]
+    for _ in range(50):
+        system.step()
+    for i, p in enumerate(particles):
+        assert np.linalg.norm(p.position - pos0[i]) > 1e-8  # Debe haber cambiado
+        assert np.linalg.norm(p.velocity - vel0[i]) > 1e-8  # Debe haber cambiado
+
+
+def test_interpolate_fields_out_of_bounds():
+    """
+    Verifica que la interpolación de campos no falla para partículas fuera de la malla (debe ignorarlas o no lanzar excepción).
+    """
+    shape = (32, 32)
+    dx = 1.0
+    dt = courant_dt(dx)
+    p = create_centered_particle(1.0, 1.0, shape)
+    p.position = xp.array([100.0, 100.0], dtype=xp.float64)  # fuera de la malla
+    system = MaxwellParticleSystem([p], shape, dx, dt)
+    try:
+        fields = system.interpolate_fields()
+        assert len(fields) == 1
+    except Exception as e:
+        pytest.fail(f"Error inesperado al interpolar campos fuera de la malla: {e}")
+
+
+def test_step_low_mass_particle():
+    """
+    Verifica que el sistema es robusto ante partículas con masa muy baja (no NaN ni inf en velocidad/posición).
+    """
+    shape = (32, 32)
+    dx = 1.0
+    dt = courant_dt(dx)
+    p = create_centered_particle(1.0, 1e-6, shape, v=0.01)
+    system = MaxwellParticleSystem([p], shape, dx, dt)
+    for _ in range(5):
+        system.step()
+        assert np.all(np.isfinite(p.position))
+        assert np.all(np.isfinite(p.velocity))
+
+
+def test_step_with_pml_and_particles_on_edge():
+    """
+    Verifica que el sistema es robusto cuando hay partículas en el borde y PML está activo.
+    """
+    shape = (32, 32)
+    dx = 1.0
+    dt = courant_dt(dx)
+    p = create_centered_particle(1.0, 1.0, shape)
+    p.position = xp.array([0.0, 0.0], dtype=xp.float64)
+    system = MaxwellParticleSystem([p], shape, dx, dt, solver_kwargs={"use_pml": True, "pml_thickness": 4, "pml_sigma_max": 20.0})
+    try:
+        for _ in range(5):
+            system.step()
+    except Exception as e:
+        pytest.fail(f"Error inesperado con PML y partícula en el borde: {e}")
+
+
+def test_total_energy_with_moving_particles():
+    """
+    Verifica que la energía total es finita y positiva cuando hay partículas en movimiento.
+    """
+    shape = (32, 32)
+    dx = 1.0
+    dt = courant_dt(dx)
+    p = create_centered_particle(1.0, 1.0, shape, v=0.5)
+    system = MaxwellParticleSystem([p], shape, dx, dt)
+    for _ in range(10):
+        system.step()
+    energy = system.total_energy()
+    assert np.isfinite(energy)
+    assert energy > 0
