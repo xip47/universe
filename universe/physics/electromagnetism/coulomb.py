@@ -71,6 +71,71 @@ def coulomb_vector_potential(*args, **kwargs):
     raise NotImplementedError("El potencial vectorial de Coulomb solo es relevante para cargas en movimiento (corrientes).")
 
 
+def coulomb_force_mevfm(q1: float, q2: float, r1: tuple, r2: tuple) -> xp.ndarray:
+    """
+    Calcula el vector de fuerza de Coulomb entre dos cargas puntuales en unidades de MeV/fm.
+
+    Parameters
+    ----------
+    q1 : float
+        Carga de la primera partícula en unidades de e.
+    q2 : float
+        Carga de la segunda partícula en unidades de e.
+    r1 : tuple of float
+        Posición (x, y, z) de la primera partícula en femtómetros (fm).
+    r2 : tuple of float
+        Posición (x, y, z) de la segunda partícula en femtómetros (fm).
+
+    Returns
+    -------
+    xp.ndarray
+        Vector de fuerza (MeV/fm) ejercida sobre la partícula 1 por la partícula 2.
+    """
+    # Constante de Coulomb en MeV·fm/e²
+    # k = (1/(4*pi*epsilon_0)) * (e²) / (1 fm) en MeV
+    # e²/(4*pi*epsilon_0) = 1.439964 MeV·fm
+    k = 1.439964
+    r1_arr = xp.array(r1, dtype=xp.float64)
+    r2_arr = xp.array(r2, dtype=xp.float64)
+    r_vec = r1_arr - r2_arr
+    distance = xp.linalg.norm(r_vec)
+    if distance == 0:
+        raise ValueError("Las partículas no pueden ocupar la misma posición (singularidad de Coulomb).")
+    force_magnitude = k * (q1 * q2) / (distance ** 2)
+    force_vector = force_magnitude * (r_vec / distance)
+    return force_vector
+
+
+def coulomb_potential_mevfm(q1: float, q2: float, r1: tuple, r2: tuple) -> float:
+    """
+    Calcula el potencial escalar de Coulomb entre dos cargas puntuales en unidades de MeV.
+
+    Parameters
+    ----------
+    q1 : float
+        Carga de la primera partícula en unidades de e.
+    q2 : float
+        Carga de la segunda partícula en unidades de e.
+    r1 : tuple of float
+        Posición (x, y, z) de la primera partícula en femtómetros (fm).
+    r2 : tuple of float
+        Posición (x, y, z) de la segunda partícula en femtómetros (fm).
+
+    Returns
+    -------
+    float
+        Potencial escalar (MeV) entre las dos partículas.
+    """
+    k = 1.439964  # MeV·fm/e²
+    r1_arr = xp.array(r1, dtype=xp.float64)
+    r2_arr = xp.array(r2, dtype=xp.float64)
+    distance = xp.linalg.norm(r1_arr - r2_arr)
+    if distance == 0:
+        raise ValueError("Las partículas no pueden ocupar la misma posición (singularidad de Coulomb).")
+    potential = k * (q1 * q2) / distance
+    return float(potential)
+
+
 def coulomb_forces_on_particles(system):
     """
     Calcula la fuerza de Coulomb sobre cada partícula de un sistema.

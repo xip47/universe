@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import subprocess
 
 from universe.config.simulation_config import CONFIG
 from universe.particles.mass_model import MassModel
@@ -34,14 +35,16 @@ def list_available_simulations(sim_dir: str = "examples") -> list[str]:
     ])
 
 
-def run_simulation(name: str) -> None:
+def run_simulation(name: str, extra_args: list[str] = None) -> None:
     """
-    Ejecuta una simulación desde el directorio 'examples/' por nombre.
+    Ejecuta una simulación desde el directorio 'examples/' por nombre, reenviando argumentos adicionales.
 
     Parameters
     ----------
     name : str
         Nombre del script sin extensión.
+    extra_args : list[str], opcional
+        Argumentos adicionales para el script de simulación.
     """
     print(f"[CLI] Backend activo: {CONFIG.backend_name.upper()}")
     sim_path = os.path.join("examples", f"{name}.py")
@@ -50,11 +53,16 @@ def run_simulation(name: str) -> None:
         print(f"[ERROR] No se encontró el script '{name}' en examples/")
         sys.exit(1)
 
+    # Filtrar el primer '--' si está presente
+    if extra_args and extra_args[0] == "--":
+        extra_args = extra_args[1:]
+
+    cmd = [sys.executable, sim_path]
+    if extra_args:
+        cmd.extend(extra_args)
     try:
-        print(f"[CLI] Ejecutando script: {sim_path}")
-        with open(sim_path, "r", encoding="utf-8") as f:
-            code = compile(f.read(), sim_path, "exec")
-            exec(code, {"__name__": "__main__"})
+        print(f"[CLI] Ejecutando script: {sim_path} {' '.join(extra_args or [])}")
+        subprocess.run(cmd, check=True)
     except Exception as e:
         print(f"[ERROR] Falló la ejecución de '{name}': {e}")
         sys.exit(1)
@@ -111,6 +119,10 @@ def _print_mass_table() -> None:
 def main() -> None:
     """
     Punto de entrada principal del CLI del framework Universe.
+    Uso:
+      universe simulate --name <script> [-- <args extra para el script>]
+    Ejemplo:
+      universe simulate --name simulate_coupled_nucleons_qt -- --init colision
     """
     parser = argparse.ArgumentParser(description="Simulador físico del universo")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -118,6 +130,7 @@ def main() -> None:
     # simulate
     simulate_parser = subparsers.add_parser("simulate", help="Ejecutar una simulación")
     simulate_parser.add_argument("--name", type=str, required=True, help="Nombre del script en 'examples/'")
+    simulate_parser.add_argument("extra_args", nargs=argparse.REMAINDER, help="Argumentos adicionales para el script de simulación")
 
     # list
     subparsers.add_parser("list", help="Listar simulaciones disponibles")
@@ -137,7 +150,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.command == "simulate":
-        run_simulation(args.name)
+        run_simulation(args.name, args.extra_args)
     elif args.command == "list":
         print("[CLI] Simulaciones disponibles:")
         for sim in list_available_simulations():
