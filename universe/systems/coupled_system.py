@@ -1,5 +1,23 @@
 """
 Módulo de sistemas acoplados: evolución de partículas bajo fuerzas nucleares y electromagnéticas.
+
+Coupled systems module: evolution of particles under nuclear and electromagnetic forces.
+
+Incluye integración con potenciales nucleares (Yukawa, Reid93) y partículas extendidas con todos los grados de libertad.
+
+Ejemplo de uso
+--------------
+>>> from universe.particles.extended_definitions import BaseParticleExtended, DynamicParticleExtended
+>>> from universe.particles.degrees_of_freedom import Spin, Isospin, Charge
+>>> from universe.physics.nuclear.potentials import YukawaPotential
+>>> from universe.systems.coupled_system import CoupledSystem
+>>> import universe.numerics.backend as xp
+>>> p1 = BaseParticleExtended('protón', 938.27, Charge(1), Spin(0.5), Isospin(0.5))
+>>> p2 = BaseParticleExtended('neutrón', 939.57, Charge(0), Spin(0.5), Isospin(-0.5))
+>>> dp1 = DynamicParticleExtended(p1, xp.array([0.0,0.0]), xp.array([0.0,0.0]), Spin(0.5), Isospin(0.5))
+>>> dp2 = DynamicParticleExtended(p2, xp.array([1.0,0.0]), xp.array([0.0,0.0]), Spin(0.5), Isospin(-0.5))
+>>> system = CoupledSystem([dp1, dp2], nuclear_potential=YukawaPotential(), use_coulomb=True)
+>>> system.step(0.01)
 """
 
 from typing import Callable, List, Optional

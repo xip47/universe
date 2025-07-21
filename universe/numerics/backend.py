@@ -72,6 +72,7 @@ log: Callable[..., Array] = xp.log
 sin: Callable[..., Array] = xp.sin
 cos: Callable[..., Array] = xp.cos
 tanh: Callable[..., Array] = xp.tanh
+allclose: Callable[..., bool] = xp.allclose
 
 # === Conversión entre GPU/CPU === #
 
